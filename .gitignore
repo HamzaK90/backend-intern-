@@ -1,0 +1,21 @@
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Packaging output
+*.egg-info/
+build/
+dist/
+
+# Editor settings
+.vscode/
+.idea/
+
+# Personal data: the expense file and exports never belong in the repo
+expenses.json
+*.csv
