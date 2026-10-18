@@ -17,5 +17,6 @@ dist/
 .idea/
 
 # Personal data: the expense file and exports never belong in the repo
-expenses.json
+expenses*.json
+*.tmp
 *.csv

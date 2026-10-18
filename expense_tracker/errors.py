@@ -20,3 +20,7 @@ class ExpenseNotFoundError(ExpenseTrackerError):
 
 class StorageError(ExpenseTrackerError):
     """The data file could not be read or written."""
+
+
+class CorruptDataError(StorageError):
+    """The data file exists but its content is broken or not understood."""
