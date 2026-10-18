@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from expense_tracker.errors import ExpenseNotFoundError, ValidationError
 from expense_tracker.models import Expense
+from expense_tracker.reports import MonthlySummary, month_range, summarize_month
 from expense_tracker.storage import JsonStorage, StoredData
 
 
@@ -120,6 +121,12 @@ class ExpenseTracker:
         expense_filter = expense_filter or ExpenseFilter()
         matching = [e for e in self._expenses if expense_filter.matches(e)]
         return sorted(matching, key=lambda e: (e.date, e.id))
+
+    def monthly_summary(self, year: int, month: int) -> MonthlySummary:
+        """Total and per-category spending for one month."""
+        first_day, last_day = month_range(year, month)
+        month_filter = ExpenseFilter(start_date=first_day, end_date=last_day)
+        return summarize_month(self.list_expenses(month_filter), year, month)
 
     def categories(self) -> list[str]:
         """Return every category used so far, alphabetically."""

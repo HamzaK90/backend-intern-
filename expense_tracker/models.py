@@ -10,6 +10,7 @@ from expense_tracker.errors import ValidationError
 STORAGE_DATE_FORMAT = "%Y-%m-%d"
 # The user types and sees day-month-year with a 4-digit year.
 USER_DATE_FORMAT = "%d-%m-%Y"
+USER_MONTH_FORMAT = "%m-%Y"
 CENT = Decimal("0.01")
 MAX_AMOUNT = Decimal("1000000000")
 MAX_TEXT_LENGTH = 100
@@ -57,11 +58,8 @@ def parse_user_date(raw: str) -> datetime.date:
     rejected here, not in Expense, so an old data file never fails to load
     just because the computer clock was changed.
     """
-    cleaned = raw.strip()
-    for separator in ("/", ".", " "):
-        cleaned = cleaned.replace(separator, "-")
     try:
-        parsed = datetime.datetime.strptime(cleaned, USER_DATE_FORMAT)
+        parsed = datetime.datetime.strptime(_normalize_separators(raw), USER_DATE_FORMAT)
     except ValueError:
         raise ValidationError(
             f"'{raw}' is not a valid date. Use DD-MM-YYYY, e.g. 18-10-2026."
@@ -73,9 +71,28 @@ def parse_user_date(raw: str) -> datetime.date:
     return value
 
 
+def parse_user_month(raw: str) -> tuple[int, int]:
+    """Turn a month the user typed ('10-2026') into (year, month)."""
+    try:
+        parsed = datetime.datetime.strptime(_normalize_separators(raw), USER_MONTH_FORMAT)
+    except ValueError:
+        raise ValidationError(
+            f"'{raw}' is not a valid month. Use MM-YYYY, e.g. 10-2026."
+        ) from None
+    return parsed.year, parsed.month
+
+
 def format_user_date(value: datetime.date) -> str:
     """Show a date the way the user types it."""
     return value.strftime(USER_DATE_FORMAT)
+
+
+def _normalize_separators(raw: str) -> str:
+    """Let the user type '/', '.' or spaces instead of '-' in dates."""
+    cleaned = raw.strip()
+    for separator in ("/", ".", " "):
+        cleaned = cleaned.replace(separator, "-")
+    return cleaned
 
 
 def clean_text(value: str, field_name: str, required: bool = True) -> str:
