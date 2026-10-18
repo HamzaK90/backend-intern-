@@ -51,12 +51,14 @@ def parse_stored_date(raw: str) -> datetime.date:
     return parsed.date()
 
 
-def parse_user_date(raw: str) -> datetime.date:
+def parse_user_date(raw: str, allow_future: bool = False) -> datetime.date:
     """Turn a date the user typed ('18-10-2026') into a date.
 
     '/', '.' and spaces are accepted as separators too. Future dates are
-    rejected here, not in Expense, so an old data file never fails to load
-    just because the computer clock was changed.
+    rejected for new expenses (you can't have spent money tomorrow), but
+    allowed in filters, e.g. "up to 31-12-2026". The check lives here, not in
+    Expense, so an old data file never fails to load because the computer
+    clock was changed.
     """
     try:
         parsed = datetime.datetime.strptime(_normalize_separators(raw), USER_DATE_FORMAT)
@@ -66,7 +68,7 @@ def parse_user_date(raw: str) -> datetime.date:
         ) from None
 
     value = parsed.date()
-    if value > datetime.date.today():
+    if not allow_future and value > datetime.date.today():
         raise ValidationError("Date cannot be in the future.")
     return value
 
