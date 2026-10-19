@@ -9,7 +9,7 @@ import argparse
 import datetime
 import sys
 from pathlib import Path
-from typing import Callable, Optional, TypeVar
+from typing import Callable, TypeVar
 
 from expense_tracker import display
 from expense_tracker.errors import CorruptDataError, ExpenseTrackerError, ValidationError
@@ -32,7 +32,7 @@ T = TypeVar("T")
 
 # --- Input helpers ---------------------------------------------------------
 
-def ask(label: str, parse: Callable[[str], T], default: Optional[str] = None) -> T:
+def ask(label: str, parse: Callable[[str], T], default: str | None = None) -> T:
     """Ask until the answer parses. Enter accepts the default, if there is one."""
     hint = f" [{default}]" if default else ""
     while True:
@@ -45,7 +45,7 @@ def ask(label: str, parse: Callable[[str], T], default: Optional[str] = None) ->
             print(f"  ! {err}")
 
 
-def ask_optional(label: str, parse: Callable[[str], T]) -> Optional[T]:
+def ask_optional(label: str, parse: Callable[[str], T]) -> T | None:
     """Like ask(), but Enter means "skip" and returns None."""
     while True:
         raw = input(f"{label} (Enter to skip): ")
@@ -208,7 +208,7 @@ class ExpenseApp:
 
 # --- Startup ---------------------------------------------------------------
 
-def load_tracker(storage: JsonStorage) -> Optional[ExpenseTracker]:
+def load_tracker(storage: JsonStorage) -> ExpenseTracker | None:
     """Load the data file. If it is broken, offer to back it up and start fresh."""
     try:
         return ExpenseTracker(storage)
@@ -234,7 +234,7 @@ def default_data_file() -> Path:
     return home / ".expense_tracker" / "expenses.json"
 
 
-def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
+def parse_args(argv: list[str] | None) -> argparse.Namespace:
     default_file = default_data_file()
     parser = argparse.ArgumentParser(
         prog="expense_tracker",
@@ -249,7 +249,7 @@ def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     """Run the app and return an exit code: 0 ok, 1 error, 130 interrupted."""
     # If the terminal can't show a character (e.g. Arabic in an old console),
     # print '?' instead of crashing.
