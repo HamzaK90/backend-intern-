@@ -11,14 +11,8 @@ import sys
 from pathlib import Path
 from typing import Callable, TypeVar
 
-from expense_tracker.domain.expense import (
-    USER_MONTH_FORMAT,
-    clean_text,
-    format_user_date,
-    parse_amount,
-    parse_user_date,
-    parse_user_month,
-)
+from expense_tracker.domain.validation import clean_text, parse_amount
+from expense_tracker.ui.user_input import parse_user_date, parse_user_month, format_user_date, USER_MONTH_FORMAT
 from expense_tracker.exceptions import CorruptDataError, ExpenseTrackerError, ValidationError
 from expense_tracker.export.csv_exporter import export_csv
 from expense_tracker.services.expense_service import ExpenseFilter, ExpenseTracker

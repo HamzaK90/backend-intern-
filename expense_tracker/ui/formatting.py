@@ -6,8 +6,10 @@ them easy to test and reuse.
 
 from decimal import Decimal
 
-from expense_tracker.domain.expense import Expense, format_user_date
+from expense_tracker.domain.expense import Expense
 from expense_tracker.services.monthly_report import MonthlySummary
+from expense_tracker.ui.user_input import format_user_date
+
 
 MAX_CELL_WIDTH = 30
 BAR_CHAR = "#"  # plain ASCII: works in every Windows console
