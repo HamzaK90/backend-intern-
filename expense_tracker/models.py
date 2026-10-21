@@ -4,7 +4,7 @@ import datetime
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 
-from expense_tracker.errors import ValidationError
+from expense_tracker.exceptions import ValidationError
 
 # The file stores ISO dates: unambiguous and they sort correctly as text.
 STORAGE_DATE_FORMAT = "%Y-%m-%d"

@@ -3,7 +3,7 @@
 import csv
 from pathlib import Path
 
-from expense_tracker.errors import StorageError
+from expense_tracker.exceptions import StorageError
 from expense_tracker.models import Expense
 
 COLUMNS = ["id", "date", "name", "category", "amount", "note"]

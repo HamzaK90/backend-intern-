@@ -179,7 +179,7 @@ expense_tracker/
 ├── exporter.py   CSV export
 ├── display.py    Turning expenses and summaries into text tables
 ├── cli.py        The interactive menu, prompts, and error handling
-├── errors.py     Exception types shared by all modules
+├── exceptions.py Exception types shared by all modules
 └── __main__.py   Entry point for `python -m expense_tracker`
 ```
 

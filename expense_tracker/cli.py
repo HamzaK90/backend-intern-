@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Callable, TypeVar
 
 from expense_tracker import display
-from expense_tracker.errors import CorruptDataError, ExpenseTrackerError, ValidationError
+from expense_tracker.exceptions import CorruptDataError, ExpenseTrackerError, ValidationError
 from expense_tracker.exporter import export_csv
 from expense_tracker.models import (
     USER_MONTH_FORMAT,
