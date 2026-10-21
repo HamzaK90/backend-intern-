@@ -174,7 +174,7 @@ The code is split by responsibility: each module has one reason to change.
 expense_tracker/
 ├── models.py     What an expense is and what counts as valid (Expense, parsing rules)
 ├── storage.py    Reading/writing the JSON data file (JsonStorage)
-├── tracker.py    The operations: add, edit, delete, list, filter (ExpenseTracker, ExpenseFilter)
+├── tracker.py    The operations: add, edit, delete, list, filter (ExpenseService, ExpenseFilter)
 ├── reports.py    Monthly summary by category
 ├── exporter.py   CSV export
 ├── display.py    Turning expenses and summaries into text tables

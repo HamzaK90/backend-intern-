@@ -15,7 +15,7 @@ from expense_tracker.domain.validation import clean_text, parse_amount
 from expense_tracker.ui.user_input import parse_user_date, parse_user_month, format_user_date, USER_MONTH_FORMAT
 from expense_tracker.exceptions import CorruptDataError, ExpenseTrackerError, ValidationError
 from expense_tracker.export.csv_exporter import export_csv
-from expense_tracker.services.expense_service import ExpenseFilter, ExpenseTracker
+from expense_tracker.services.expense_service import ExpenseFilter, ExpenseService
 from expense_tracker.storage.json_storage import JsonStorage
 from expense_tracker.ui import formatting
 
@@ -77,7 +77,7 @@ def parse_future_ok_date(raw: str) -> datetime.date:
 class ExpenseApp:
     """The main menu loop. Each menu entry maps to one method."""
 
-    def __init__(self, tracker: ExpenseTracker) -> None:
+    def __init__(self, tracker: ExpenseService) -> None:
         self.tracker = tracker
         self.menu = {
             "1": ("Add expense", self.add_expense),
@@ -202,10 +202,11 @@ class ExpenseApp:
 
 # --- Startup ---------------------------------------------------------------
 
-def load_tracker(storage: JsonStorage) -> ExpenseTracker | None:
+def load_tracker(storage: JsonStorage) -> ExpenseService | None:
     """Load the data file. If it is broken, offer to back it up and start fresh."""
+    tracker = ExpenseService(storage)
     try:
-        return ExpenseTracker(storage)
+        tracker.load()
     except CorruptDataError as err:
         print(f"! {err}")
         if not confirm("Move the broken file aside and start with an empty one?"):
@@ -213,7 +214,8 @@ def load_tracker(storage: JsonStorage) -> ExpenseTracker | None:
             return None
         backup_path = storage.backup_corrupt_file()
         print(f"The old file was saved as {backup_path}")
-        return ExpenseTracker(storage)
+        tracker.load()
+    return tracker
 
 
 def default_data_file() -> Path:

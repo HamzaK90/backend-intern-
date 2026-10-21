@@ -48,7 +48,7 @@ def month_range(year: int, month: int) -> tuple[datetime.date, datetime.date]:
 def summarize_month(expenses: list[Expense], year: int, month: int) -> MonthlySummary:
     """Group one month's expenses by category, biggest spending first.
 
-    The caller passes only that month's expenses (ExpenseTracker does the
+    The caller passes only that month's expenses (ExpenseService does the
     filtering).
     """
     totals: dict[str, Decimal] = {}

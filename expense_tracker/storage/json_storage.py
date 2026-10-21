@@ -2,25 +2,17 @@
 
 import json
 import os
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
 from expense_tracker.exceptions import CorruptDataError, StorageError, ValidationError
 from expense_tracker.domain.expense import Expense
+from expense_tracker.storage.base import StoredData, Storage
 
 FILE_VERSION = 1
 
 
-@dataclass
-class StoredData:
-    """Everything kept in the data file."""
-
-    expenses: list[Expense] = field(default_factory=list)
-    next_id: int = 1
-
-
-class JsonStorage:
+class JsonStorage(Storage):
     """Reads and writes the expense file.
 
     File layout:

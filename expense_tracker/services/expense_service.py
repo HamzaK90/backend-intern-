@@ -8,7 +8,7 @@ from decimal import Decimal
 from expense_tracker.exceptions import ExpenseNotFoundError, ValidationError
 from expense_tracker.domain.expense import Expense
 from expense_tracker.services.monthly_report import MonthlySummary, month_range, summarize_month
-from expense_tracker.storage.json_storage import JsonStorage, StoredData
+from expense_tracker.storage.base import StoredData, Storage
 
 
 @dataclass
@@ -54,14 +54,21 @@ class ExpenseFilter:
         return True
 
 
-class ExpenseTracker:
+class ExpenseService:
     """Holds the user's expenses in memory and saves every change to storage."""
-
-    def __init__(self, storage: JsonStorage) -> None:
+    
+    def __init__(self, storage: Storage) -> None:
         self._storage = storage
-        data = storage.load()
+        self._expenses: list[Expense] = []
+        self._next_id = 1
+        self._loaded = False
+
+    def load(self) -> None:
+        """Read the saved data. Must be called before anything else."""
+        data = self._storage.load()
         self._expenses = data.expenses
         self._next_id = data.next_id
+        self._loaded = True
 
     def add(
         self,
@@ -138,6 +145,9 @@ class ExpenseTracker:
         If saving fails, StorageError propagates and memory still matches the
         file, so the user never sees an expense that wasn't actually saved.
         """
+        if not self._loaded:
+            raise RuntimeError("load() must be called before changing expenses.")
+
         self._storage.save(StoredData(expenses, next_id))
         self._expenses = expenses
         self._next_id = next_id
