@@ -1,13 +1,13 @@
 """Turning expenses and summaries into text for the terminal.
 
-These functions only build strings; printing happens in cli.py. That keeps
+These functions only build strings; printing happens in ui/menu.py. That keeps
 them easy to test and reuse.
 """
 
 from decimal import Decimal
 
-from expense_tracker.models import Expense, format_user_date
-from expense_tracker.reports import MonthlySummary
+from expense_tracker.domain.expense import Expense, format_user_date
+from expense_tracker.services.monthly_report import MonthlySummary
 
 MAX_CELL_WIDTH = 30
 BAR_CHAR = "#"  # plain ASCII: works in every Windows console

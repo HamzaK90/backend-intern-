@@ -11,10 +11,7 @@ import sys
 from pathlib import Path
 from typing import Callable, TypeVar
 
-from expense_tracker import display
-from expense_tracker.exceptions import CorruptDataError, ExpenseTrackerError, ValidationError
-from expense_tracker.exporter import export_csv
-from expense_tracker.models import (
+from expense_tracker.domain.expense import (
     USER_MONTH_FORMAT,
     clean_text,
     format_user_date,
@@ -22,8 +19,11 @@ from expense_tracker.models import (
     parse_user_date,
     parse_user_month,
 )
-from expense_tracker.storage import JsonStorage
-from expense_tracker.tracker import ExpenseFilter, ExpenseTracker
+from expense_tracker.exceptions import CorruptDataError, ExpenseTrackerError, ValidationError
+from expense_tracker.export.csv_exporter import export_csv
+from expense_tracker.services.expense_service import ExpenseFilter, ExpenseTracker
+from expense_tracker.storage.json_storage import JsonStorage
+from expense_tracker.ui import formatting
 
 CLEAR_NOTE = "-"
 
@@ -132,16 +132,16 @@ class ExpenseApp:
         date = ask("Date (DD-MM-YYYY)", parse_user_date, default=format_user_date(datetime.date.today()))
         note = ask("Note (optional)", text_parser("Note", required=False), default="")
         expense = self.tracker.add(name, category, amount, date, note)
-        print(f"  Added: {display.expense_details(expense)}")
+        print(f"  Added: {formatting.expense_details(expense)}")
 
     def list_expenses(self) -> None:
         expense_filter = self._ask_filter()
         print()
-        print(display.expense_table(self.tracker.list_expenses(expense_filter)))
+        print(formatting.expense_table(self.tracker.list_expenses(expense_filter)))
 
     def edit_expense(self) -> None:
         expense = self.tracker.get(ask("Expense id", parse_id))
-        print(f"  Editing: {display.expense_details(expense)}")
+        print(f"  Editing: {formatting.expense_details(expense)}")
         print(f"  Press Enter to keep the current value. Type '{CLEAR_NOTE}' to clear the note.")
         name = ask("Name", text_parser("Name"), default=expense.name)
         category = ask("Category", text_parser("Category"), default=expense.category)
@@ -153,11 +153,11 @@ class ExpenseApp:
         updated = self.tracker.update(
             expense.id, name=name, category=category, amount=amount, date=date, note=note
         )
-        print(f"  Saved: {display.expense_details(updated)}")
+        print(f"  Saved: {formatting.expense_details(updated)}")
 
     def delete_expense(self) -> None:
         expense = self.tracker.get(ask("Expense id", parse_id))
-        print(f"  {display.expense_details(expense)}")
+        print(f"  {formatting.expense_details(expense)}")
         if not confirm("Delete this expense?"):
             print("  Nothing deleted.")
             return
@@ -168,7 +168,7 @@ class ExpenseApp:
         this_month = datetime.date.today().strftime(USER_MONTH_FORMAT)
         year, month = ask("Month (MM-YYYY)", parse_user_month, default=this_month)
         print()
-        print(display.summary_report(self.tracker.monthly_summary(year, month)))
+        print(formatting.summary_report(self.tracker.monthly_summary(year, month)))
 
     def export(self) -> None:
         expense_filter = self._ask_filter()

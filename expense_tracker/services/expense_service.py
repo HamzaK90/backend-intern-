@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from expense_tracker.exceptions import ExpenseNotFoundError, ValidationError
-from expense_tracker.models import Expense
-from expense_tracker.reports import MonthlySummary, month_range, summarize_month
-from expense_tracker.storage import JsonStorage, StoredData
+from expense_tracker.domain.expense import Expense
+from expense_tracker.services.monthly_report import MonthlySummary, month_range, summarize_month
+from expense_tracker.storage.json_storage import JsonStorage, StoredData
 
 
 @dataclass

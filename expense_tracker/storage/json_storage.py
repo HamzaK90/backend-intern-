@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 from expense_tracker.exceptions import CorruptDataError, StorageError, ValidationError
-from expense_tracker.models import Expense
+from expense_tracker.domain.expense import Expense
 
 FILE_VERSION = 1
 

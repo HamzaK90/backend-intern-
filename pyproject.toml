@@ -11,8 +11,5 @@ requires-python = ">=3.10"
 # The app itself uses only the Python standard library.
 dependencies = []
 
-[project.scripts]
-expense-tracker = "expense_tracker.cli:main"
-
-[tool.setuptools]
-packages = ["expense_tracker"]
+[tool.setuptools.packages.find]
+include = ["expense_tracker*"]
