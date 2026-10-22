@@ -7,29 +7,54 @@ every change and is still there the next time you start the app.
 
 Pure Python 3.10+, no third-party packages needed to run it.
 
+## Features
+
+- **Add, list, edit and delete expenses.** Each expense gets a unique id.
+  Editing is there because mistakes happen; deleting and re-adding would lose
+  the id and is tedious.
+- **Filtering.** Filter by category, date range, text search and amount range,
+  combined. "What did I spend on food last month?" is a real question.
+- **Monthly summary.** The month's total and a breakdown by category.
+- **CSV export** of all or filtered expenses that opens correctly in Excel:
+  UTF-8 with BOM so non-English text (e.g. Arabic) displays properly, ISO dates,
+  and formula escaping against CSV injection.
+- **Safe saving.** Data is saved after every change, atomically, so a crash or
+  power cut during a save can't corrupt it.
+- **Broken data file handling.** The app says what is wrong and lets you
+  decide whether to back the file up and start fresh. Data is never silently
+  lost.
+- **`--file` option.** Keep separate files (e.g. personal / business) or try
+  the app on test data.
+
 ---
 
 ## Installation
 
-You need **Python 3.10 or newer** (`python --version`).
+You need **Python 3.10 or newer** (`python --version`). The app uses only the
+standard library, so there is nothing else to install:
 
 ```bash
 git clone https://github.com/HamzaK90/backend-intern-.git
 cd backend-intern-
-python -m venv .venv
+```
 
-# Activate the environment
+Optional: install it as a package in a virtual environment (this is what
+`pyproject.toml` is for; it also documents the Python version and the empty
+dependency list):
+
+```bash
+python -m venv .venv
 .venv\Scripts\activate          # Windows
 source .venv/bin/activate       # macOS / Linux
-
-pip install -e .                # one step: installs the app and the expense-tracker command
+pip install -e .
 ```
 
 ## Running
 
+From the project folder:
+
 ```bash
-expense-tracker                 # after installing
-python -m expense_tracker       # works from the project folder, even without installing
+python main.py
 ```
 
 By default your data is stored in `~/.expense_tracker/expenses.json`
@@ -38,8 +63,8 @@ same expenses no matter which folder you start the app from.
 To use a different file:
 
 ```bash
-expense-tracker --file path/to/my_expenses.json
-expense-tracker --help
+python main.py --file path/to/my_expenses.json
+python main.py --help
 ```
 
 ---
@@ -168,25 +193,52 @@ message.
 
 ### Project structure
 
-The code is split by responsibility: each module has one reason to change.
+The code is split into layers, one folder each, and every file has one job.
 
 ```
+main.py                        Entry point: reads --file, builds the app, runs it
 expense_tracker/
-├── models.py     What an expense is and what counts as valid (Expense, parsing rules)
-├── storage.py    Reading/writing the JSON data file (JsonStorage)
-├── tracker.py    The operations: add, edit, delete, list, filter (ExpenseService, ExpenseFilter)
-├── reports.py    Monthly summary by category
-├── exporter.py   CSV export
-├── display.py    Turning expenses and summaries into text tables
-├── cli.py        The interactive menu, prompts, and error handling
-├── exceptions.py Exception types shared by all modules
-└── __main__.py   Entry point for `python -m expense_tracker`
+├── app.py                     App: start-up, top-level error handling, exit code (Singleton)
+├── factory.py                 AppFactory: creates and connects all the objects (Factory)
+├── exceptions.py              Error types shared by all layers
+├── domain/                    What an expense is. Knows nothing about files or users.
+│   ├── expense.py             Expense and its conversion to/from JSON
+│   └── validation.py          Rules: valid amounts, text, stored dates
+├── storage/                   Saving and loading
+│   ├── base.py                Storage interface (any storage format must provide it)
+│   └── json_storage.py        JsonStorage: the JSON file, atomic saves, broken-file checks
+├── services/                  What the user can do
+│   ├── expense_service.py     ExpenseService (add, edit, delete, list) and ExpenseFilter
+│   └── monthly_report.py      Monthly totals by category
+├── export/
+│   └── csv_exporter.py        CSV export
+└── ui/                        Everything the terminal user sees
+    ├── menu.py                Menu: shows the options and runs the chosen one
+    ├── actions/               One class per menu option, each with a run() method
+    ├── prompts.py             Asking until the answer is valid (ask, confirm, filters)
+    ├── user_input.py          The user's date formats (DD-MM-YYYY)
+    └── formatting.py          Tables and the summary report
 ```
 
-Each layer only calls the layer below it: `cli` → `tracker` → `storage`.
-Only `cli.py` reads input or prints; nothing else knows a terminal exists. So
-the menu could be replaced by a web page, or JSON by SQLite, without touching
-the other modules.
+Each layer only uses the layers below it: `ui` → `services` → `storage` →
+`domain`. Only `ui/` reads input or prints. So the terminal menu could be
+replaced by a web page, or JSON by SQLite, without touching the other layers.
+
+How the app starts:
+
+```
+python main.py → AppFactory(file).create_app() → app.run()
+                  storage → service → actions → menu → App
+```
+
+### Design patterns
+
+| Pattern | Where | Why |
+|---|---|---|
+| **Singleton** | `App` | Only one `App` can exist (`App(...)` always returns the same object), so there is exactly one owner of the data file while the program runs. |
+| **Factory** | `AppFactory` | The only place that creates the storage, service, actions and menu. The rest of the code just receives ready-made objects, so switching JSON to SQLite changes one line in `create_storage()`. |
+| **Strategy** | `Storage` → `JsonStorage` | `ExpenseService` works with any `Storage`; it never knows the data is JSON. |
+| **Command** | `MenuAction` → one class per option | Each option is an object with `label` and `run()`. The menu calls `action.run()` without any `if/elif`; adding an option means adding one class. |
 
 ### Main choices
 
@@ -228,19 +280,3 @@ the other modules.
   ]
 }
 ```
-
----
-
-## Going further: what I added and why
-
-- **Edit an expense.** The task says users should be able to *correct
-  mistakes*. Deleting and re-adding loses the id and is tedious.
-- **Rich filtering.** Filter by category, date range, text search and amount
-  range, combined. "What did I spend on food last month?" is a real question.
-- **Safe handling of a broken data file.** The user decides whether to back it
-  up and start fresh; data is never silently lost.
-- **Atomic saves.** A crash or power cut during a save can't corrupt the data.
-- **Excel-friendly CSV.** UTF-8 with BOM so non-English text (e.g. Arabic) shows
-  correctly in Excel, ISO dates, and formula escaping against CSV injection.
-- **`--file` option.** Keep separate files (e.g. personal / business) or try
-  the app on test data.
