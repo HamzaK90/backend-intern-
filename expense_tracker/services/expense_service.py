@@ -4,6 +4,7 @@ import dataclasses
 import datetime
 from dataclasses import dataclass
 from decimal import Decimal
+from pathlib import Path
 
 from expense_tracker.exceptions import ExpenseNotFoundError, ValidationError
 from expense_tracker.domain.expense import Expense
@@ -69,6 +70,12 @@ class ExpenseService:
         self._expenses = data.expenses
         self._next_id = data.next_id
         self._loaded = True
+
+    def recover_from_corrupt_data(self) -> Path:
+        """Move the broken saved data aside, start empty, and return the backup path."""
+        backup_path = self._storage.backup_corrupt_file()
+        self.load()
+        return backup_path
 
     def add(
         self,

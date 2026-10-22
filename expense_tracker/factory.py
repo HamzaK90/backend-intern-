@@ -8,6 +8,7 @@ here and nothing else.
 
 from pathlib import Path
 
+from expense_tracker.app import App
 from expense_tracker.services.expense_service import ExpenseService
 from expense_tracker.storage.base import Storage
 from expense_tracker.storage.json_storage import JsonStorage
@@ -44,3 +45,8 @@ class AppFactory:
             ExportExpensesAction(service),
         ]
         return Menu(actions)
+
+    def create_app(self) -> App:
+        """Build the whole object graph: storage -> service -> menu -> App."""
+        service = self.create_service(self.create_storage())
+        return App(service, self.create_menu(service), self._data_file)
