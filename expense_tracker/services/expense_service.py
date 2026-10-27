@@ -8,6 +8,7 @@ from pathlib import Path
 from expense_tracker.domain.expense import Expense
 from expense_tracker.exceptions import ExpenseNotFoundError
 from expense_tracker.filters.expense_filter import ExpenseFilter
+from expense_tracker.filters.rules import DateRangeRule
 from expense_tracker.services.monthly_report import MonthlySummary, month_range, summarize_month
 from expense_tracker.storage.base import StoredData, Storage
 
@@ -96,7 +97,7 @@ class ExpenseService:
     def monthly_summary(self, year: int, month: int) -> MonthlySummary:
         """Total and per-category spending for one month."""
         first_day, last_day = month_range(year, month)
-        month_filter = ExpenseFilter(start_date=first_day, end_date=last_day)
+        month_filter = ExpenseFilter([DateRangeRule(first_day, last_day)])
         return summarize_month(self.list_expenses(month_filter), year, month)
 
     def categories(self) -> list[str]:

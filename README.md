@@ -210,8 +210,9 @@ expense_tracker/
 ├── services/                  What the user can do
 │   ├── expense_service.py     ExpenseService (add, edit, delete, list)
 │   └── monthly_report.py      Monthly totals by category
-├── filters/
-│   └── expense_filter.py      ExpenseFilter: category, date, text and amount conditions
+├── filters/                   Narrowing down the list (rule engine)
+│   ├── rules.py               Rule interface + Category, DateRange, AmountRange, TextSearch rules
+│   └── expense_filter.py      ExpenseFilter: a list of rules; an expense must pass all of them
 ├── export/
 │   └── csv_exporter.py        CSV export
 └── ui/                        Everything the terminal user sees
@@ -240,6 +241,7 @@ python main.py → AppFactory(file).create_app() → app.run()
 | **Singleton** | `App` | Only one `App` can exist (`App(...)` always returns the same object), so there is exactly one owner of the data file while the program runs. |
 | **Factory** | `AppFactory` | The only place that creates the storage, service, actions and menu. The rest of the code just receives ready-made objects, so switching JSON to SQLite changes one line in `create_storage()`. |
 | **Strategy** | `Storage` → `JsonStorage` | `ExpenseService` works with any `Storage`; it never knows the data is JSON. |
+| **Rule engine (Specification)** | `Rule` → `CategoryRule`, `DateRangeRule`, ... | Each filter condition is its own class with `matches(expense)`. `ExpenseFilter` runs `all(rule.matches(e) for rule in rules)`, so a new kind of filter is a new class, not another `if` in one big method. |
 | **Command** | `MenuAction` → one class per option | Each option is an object with `label` and `run()`. The menu calls `action.run()` without any `if/elif`; adding an option means adding one class. |
 
 ### Main choices
