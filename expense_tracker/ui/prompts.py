@@ -7,7 +7,7 @@ from typing import Callable, TypeVar
 from expense_tracker.domain.validation import clean_text, parse_amount
 from expense_tracker.ui.user_input import parse_user_date
 from expense_tracker.exceptions import ValidationError
-from expense_tracker.services.expense_service import ExpenseFilter
+from expense_tracker.filters.expense_filter import ExpenseFilter
 
 T = TypeVar("T")
 

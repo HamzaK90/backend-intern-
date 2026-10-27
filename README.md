@@ -208,8 +208,10 @@ expense_tracker/
 │   ├── base.py                Storage interface (any storage format must provide it)
 │   └── json_storage.py        JsonStorage: the JSON file, atomic saves, broken-file checks
 ├── services/                  What the user can do
-│   ├── expense_service.py     ExpenseService (add, edit, delete, list) and ExpenseFilter
+│   ├── expense_service.py     ExpenseService (add, edit, delete, list)
 │   └── monthly_report.py      Monthly totals by category
+├── filters/
+│   └── expense_filter.py      ExpenseFilter: category, date, text and amount conditions
 ├── export/
 │   └── csv_exporter.py        CSV export
 └── ui/                        Everything the terminal user sees
